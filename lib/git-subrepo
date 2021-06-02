@@ -231,7 +231,7 @@ command:pull() {
   command-setup +subdir
 
   subrepo:pull
-  if OK; then
+  if OK_or_0; then
     say "Subrepo '$subdir' pulled from '$subrepo_remote' ($subrepo_branch)."
   elif [[ $CODE -eq -1 ]]; then
     say "Subrepo '$subdir' is up to date."
@@ -250,7 +250,7 @@ command:push() {
   command-setup +subdir branch
 
   subrepo:push
-  if OK; then
+  if OK_or_0; then
     say "Subrepo '$subdir' pushed to '$subrepo_remote' ($subrepo_branch)."
   elif [[ $CODE -eq -2 ]]; then
     say "Subrepo '$subdir' has no new commits to push."
@@ -589,6 +589,12 @@ subrepo:push() {
   local new_upstream=false
   local branch_created=false
 
+  # if override_branch is not specified then calculate a default branch name for the subrepo push
+  if [ "$override_branch" = "" ]; then
+    repo_name="$(basename $(git rev-parse --show-toplevel))" || repo_name="unknown" # may fail
+    subrepo_branch="$repo_name-$original_head_branch"
+  fi
+
   if [[ -z $branch_name ]]; then
     FAIL=false OUT=false CALL subrepo:fetch
 
@@ -684,11 +690,11 @@ subrepo:push() {
     git:delete-branch "$branch_name"
   fi
 
-  o "Put updates into '$subdir/.gitrepo' file."
-  upstream_head_commit=$new_upstream_head_commit
-  subrepo_commit_ref=$upstream_head_commit
-  update-gitrepo-file
-  RUN git commit -m "$(get-commit-message)"
+  #o "Put updates into '$subdir/.gitrepo' file."
+  #upstream_head_commit=$new_upstream_head_commit
+  #subrepo_commit_ref=$upstream_head_commit
+  #update-gitrepo-file
+  #RUN git commit -m "$(get-commit-message)"
 }
 
 # Fetch the subrepo's remote branch content:
@@ -1727,7 +1733,8 @@ shown in the output above.
 
 This is the common conflict resolution workflow:
 
-  1. cd $worktree
+  1. cd $(realpath . --relative-to $OLDPWD)
+     alternatively: git-cola -r $(realpath .)
   2. Resolve the conflicts (see "git status").
   3. "git add" the resolved files.
 ...
@@ -1924,6 +1931,11 @@ err() {
 # Check if OK:
 OK() {
   $OK
+}
+
+# Check if OK or 0:
+OK_or_0() {
+  $OK || [ "$CODE" = "0" ]
 }
 
 # Nicely report common error messages:

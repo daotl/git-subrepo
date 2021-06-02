@@ -19,7 +19,6 @@ _git_subrepo() {
         esac
 
     else
-
         case "$cur" in
         -*)
             __gitcomp "$_opts"
@@ -34,9 +33,15 @@ _git_subrepo() {
 
         local subdircommand="$(__git_find_on_cmdline "$subdircommands")"
         if [ ! -z "$subdircommand" ]; then
+            PWD_BAK=$PWD
+            GIT_ROOT=$(git rev-parse --show-toplevel)
+            cd $GIT_ROOT
             local git_subrepos=`git subrepo status -q`
-            __gitcomp "$git_subrepos"
+            git_subrepos_pwd=`for git_subrepo in $git_subrepos; do realpath --relative-to=$PWD_BAK -m $git_subrepo; done`
+            cd $PWD_BAK
+            __gitcomp "$git_subrepos_pwd"
         fi
 
     fi
 }
+
