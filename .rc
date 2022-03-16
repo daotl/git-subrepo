@@ -12,7 +12,7 @@
 #   source /path/to/git-subrepo/.rc
 #
 #------------------------------------------------------------------------------
-
+set -x
 [[ -n ${ZSH_VERSION-} ]] &&
   GIT_SUBREPO_ROOT=$0 ||
   GIT_SUBREPO_ROOT=$BASH_SOURCE
@@ -31,5 +31,5 @@ export MANPATH=$GIT_SUBREPO_ROOT/man:$MANPATH
 
 source "$GIT_SUBREPO_ROOT/share/enable-completion.sh"
 
-alias subrepo="$(realpath $(dirname $BASH_SOURCE)/wrapper.sh)"
-__git_complete subrepo _git_subrepo
+# alias subrepo="$(realpath $(dirname $GIT_SUBREPO_ROOT/wrapper.sh))"
+# __git_complete subrepo _git_subrepo
