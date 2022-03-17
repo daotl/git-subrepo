@@ -35,9 +35,6 @@ is "$(
   "Created branch 'subrepo/bar' and worktree '.git/tmp/subrepo/bar'." \
   "subrepo branch command output is correct"
 
-diag "$(
-  echo 'hello world'; pwd; cd "$OWNER/foo" && git log | head -100 && git rev-list subrepo/bar
-)";
 got="$(
   cd "$OWNER/foo"
   git rev-list subrepo/bar | wc -l

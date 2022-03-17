@@ -590,10 +590,10 @@ subrepo:push() {
   local branch_created=false
 
   # if override_branch is not specified then calculate a default branch name for the subrepo push
-  if [ "$override_branch" = "" ]; then
-    repo_name="$(basename $(git rev-parse --show-toplevel))" || repo_name="unknown" # may fail
-    subrepo_branch="$repo_name-$original_head_branch"
-  fi
+  # if [ "$override_branch" = "" ]; then
+  #   repo_name="$(basename $(git rev-parse --show-toplevel))" || repo_name="unknown" # may fail
+  #   subrepo_branch="$repo_name-$original_head_branch"
+  # fi
 
   if [[ -z $branch_name ]]; then
     FAIL=false OUT=false CALL subrepo:fetch
@@ -690,11 +690,11 @@ subrepo:push() {
     git:delete-branch "$branch_name"
   fi
 
-  # o "Put updates into '$subdir/.gitrepo' file."
-  # upstream_head_commit=$new_upstream_head_commit
-  # subrepo_commit_ref=$upstream_head_commit
-  # update-gitrepo-file
-  # RUN git commit -m "$(get-commit-message)"
+  o "Put updates into '$subdir/.gitrepo' file."
+  upstream_head_commit=$new_upstream_head_commit
+  subrepo_commit_ref=$upstream_head_commit
+  update-gitrepo-file
+  RUN git commit -m "$(get-commit-message)"
 }
 
 # Fetch the subrepo's remote branch content:
