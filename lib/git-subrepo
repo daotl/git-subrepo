@@ -195,7 +195,7 @@ command:clone() {
   local reclone_up_to_date=false
   subrepo:clone
   if "$reclone_up_to_date"; then
-    say "Subrepo '$subdir' ($subrepo_branch)  is up to date."
+    say "Subrepo '$subdir' ($subrepo_branch) is up to date."
     return
   fi
 
@@ -590,6 +590,7 @@ subrepo:push() {
   local branch_created=false
 
   # if override_branch is not specified then calculate a default branch name for the subrepo push
+  # TODO: this makes the tests (test/branch-rev-list.t) fail
   # if [ "$override_branch" = "" ]; then
   #   repo_name="$(basename $(git rev-parse --show-toplevel))" || repo_name="unknown" # may fail
   #   subrepo_branch="$repo_name-$original_head_branch"
@@ -1916,7 +1917,6 @@ RUN() {
   fi
   output=$out
 }
-
 
 interactive() {
   if [[ -t 0 && -t 1 ]]; then
