@@ -48,7 +48,7 @@ gitrepo=$OWNER/foo/bar/.gitrepo
 
   # Test the output:
   is "$message" \
-    "Subrepo 'bar' has no new commits to push." \
+    "Subrepo 'bar' (newbar) has no new commits to push." \
     'Second push message is correct'
 
   test-gitrepo-field "branch" "newbar"
