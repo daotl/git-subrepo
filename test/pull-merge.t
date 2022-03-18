@@ -79,6 +79,7 @@ is "$(cat "$OWNER/foo/bar/Bar2")" \
   test-gitrepo-field "parent" "$foo_pull_commit"
 }
 
+diag "$(cd "$OWNER/foo"; git subrepo status; git subrepo push bar)"
 (
   cd "$OWNER/foo"
   git subrepo push bar
