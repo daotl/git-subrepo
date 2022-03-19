@@ -164,6 +164,8 @@ main() {
     # Run the command on all subrepos
     local args=( "${command_arguments[@]}" )
     get-all-subrepos
+    # TODO(mahmoudimus): uncomment
+    # for subdir in "${subrepos[@]}"; do
     for subdir in ${subrepos[*]}; do
       command-prepare
       subrepo_remote=
@@ -1594,6 +1596,7 @@ assert-subdir-ready-for-init() {
 
 # If subdir exists, make sure it is empty:
 assert-subdir-empty() {
+  # if [[ -d "$subdir" ]] && [[ -n "$(ls -A "$subdir")" ]]; then
   if [[ -e $subdir ]] && [[ $(ls -A "$subdir") ]]; then
     error "The subdir '$subdir' exists and is not empty."
   fi
@@ -1610,9 +1613,12 @@ get-all-subrepos() {
   mapfile -t paths < <(git ls-files | sed -n 's!/\.gitrepo$!!p' | sort)
   subrepos=()
   local path
-  for path in "${paths[@]}"; do
-    add-subrepo "$path"
-  done
+  while read -r path; do
+  # for path in "${paths[@]}"; do
+      add-subrepo "$path"
+  done <<< "$paths"
+  # done
+  
 }
 
 add-subrepo() {

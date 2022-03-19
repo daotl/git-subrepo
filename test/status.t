@@ -14,8 +14,7 @@ clone-foo-and-bar
      mkdir lib
      git subrepo clone "$UPSTREAM/bar" lib/bar
      git subrepo clone "$UPSTREAM/foo" lib/bar/foo
-)
-# ) &> /dev/null || die
+) &> /dev/null || die
 
 
 {

@@ -26,7 +26,8 @@ clone-foo-and-bar
 
   # Make a commit in a subrepo nested in a subrepo:
   add-new-files bar/bar/FooBaz
-) &> /dev/null || die
+) 
+# ) &> /dev/null || die
 
 # Do the subrepo push to another branch:
 {
