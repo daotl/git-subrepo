@@ -9,12 +9,13 @@ use Test::More
 clone-foo-and-bar
 (
      cd $OWNER/foo
-     git subrepo clone ../../../$UPSTREAM/bar
-     git subrepo clone ../../../$UPSTREAM/foo bar/foo
+     git subrepo clone "$UPSTREAM/bar"
+     git subrepo clone "$UPSTREAM/foo" bar/foo
      mkdir lib
-     git subrepo clone ../../../$UPSTREAM/bar lib/bar
-     git subrepo clone ../../../$UPSTREAM/foo lib/bar/foo
-) &> /dev/null || die
+     git subrepo clone "$UPSTREAM/bar" lib/bar
+     git subrepo clone "$UPSTREAM/foo" lib/bar/foo
+)
+# ) &> /dev/null || die
 
 
 {
@@ -42,8 +43,7 @@ clone-foo-and-bar
 
 {
   output="$(
-    cd $OWNER/foo
-    git subrepo status --all-recursive
+    git subrepo status --ALL
   )"
 
   like "$output" "4 subrepos:" \
@@ -62,6 +62,6 @@ clone-foo-and-bar
     "ext/test-more-bash/ext/test-tap-bash is in 'status --ALL'"
 }
 
-done_testing 15
+done_testing
 
 teardown
