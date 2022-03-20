@@ -1,6 +1,11 @@
 git-subrepo
 ===========
 
+<<< markdown
+![ci](https://github.com/mahmoudimus/git-subrepo/actions/workflows/test.yml/badge.svg)
+>>>
+
+
 Git Submodule Alternative
 
 = Synopsis
