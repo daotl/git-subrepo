@@ -18,22 +18,21 @@ clone-foo-and-bar
   # Clone a subrepo into a subdir
   git subrepo clone "$UPSTREAM/bar"
 
-  # Clone another subrepo into a nested subdir (here it's bar -- no e.g. baz in current fixture)
-  git subrepo clone "$UPSTREAM/bar" "bar/bar"
+  # Clone another subrepo into a nested subdir (here it's bar still but because there's another file called Bar, we will call the subrepo "baz" instead -- there is no baz in current fixture, so we need do this workaround)
+  git subrepo clone "$UPSTREAM/bar" "bar/baz"
 
   # Make a commit in a subrepo:
   add-new-files bar/FooBar
 
   # Make a commit in a subrepo nested in a subrepo:
-  add-new-files bar/bar/FooBaz
-) 
-# ) &> /dev/null || die
+  add-new-files bar/baz/FooBaz
+) &> /dev/null || die
 
 # Do the subrepo push to another branch:
 {
   message=$(
     cd "$OWNER/foo"
-    git subrepo push bar/bar --branch newbar
+    git subrepo push bar/baz --branch newbar
     git subrepo pull bar --branch newbar # FooBaz
   )
 
@@ -63,11 +62,11 @@ test-exists \
 
 if [[ $nested_fix == 1 ]] ; then
   # nested subrepo skipped at push: no bar/bar
-  [[ ! -f "$OWNER/bar/bar/FooBaz" ]]
+  [[ ! -f "$OWNER/bar/baz/FooBaz" ]]
 else
   # nested subrepo (in subdir bar/bar) added as well
   test-exists \
-    "$OWNER/bar/bar/FooBaz"
+    "$OWNER/bar/baz/FooBaz"
 fi
 
 done_testing
