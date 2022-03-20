@@ -830,33 +830,12 @@ subrepo:branch() {
       "$subref" "$branch"
   fi
 
-  local findbin
   # Mechanism to skip subdirs containing subrepos during a push.
   # TODO: 1) mention dependency on 'find'; 2) may be turned on/off on option.
-  case "$(uname -s)" in
-    Darwin)
-      if [[ $(hash gfind) -ne 0 ]]; then
-        echo "*** WARNING ***: gfind is a dependency! brew install findutils"
-      else
-        findbin=gfind
-      fi
-     ;;
-
-   Linux)
-      if [[ $(hash find) -ne 0 ]]; then
-        echo "find is missing!"
-      else
-        findbin=find
-      fi
-     ;;
-   *)
-     echo 'Unsupported OS. No "find" or "gfind" found' 
-     ;;
-  esac
-  if [[ ! -z findbin ]]; then
+  if [[ $(hash find) -eq 0 ]]; then 
     o "Checking $subdir for nested subdirs to avoid"
     local subdirs
-    mapfile -t subdirs < <(cd -- "$subdir"; $findbin -mindepth 1 -type d -exec 'test' '-f' '{}/.gitrepo' ';' -print)
+    mapfile -t subdirs < <(cd -- "$subdir"; find . -mindepth 1 -type d -exec 'test' '-f' '{}/.gitrepo' ';' -print)
     if [[ ${#subdirs[@]} -gt 0 ]]; then
       for d in "${subdirs[@]}"; do
         o "Found $d: will rebase to exclude it";
@@ -1613,12 +1592,12 @@ get-all-subrepos() {
   mapfile -t paths < <(git ls-files | sed -n 's!/\.gitrepo$!!p' | sort)
   subrepos=()
   local path
-  while read -r path; do
-  # for path in "${paths[@]}"; do
+  # while read -r path; do
+  #   add-subrepo "$path"
+  # done <<< "$paths"
+  for path in "${paths[@]}"; do
       add-subrepo "$path"
-  done <<< "$paths"
-  # done
-  
+  done
 }
 
 add-subrepo() {
