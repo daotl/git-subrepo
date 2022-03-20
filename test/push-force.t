@@ -36,7 +36,8 @@ test-exists \
   set +x
   cd "$OWNER/bar"
   git pull
-) &> /dev/null || die
+)
+# ) &> /dev/null || die
 
 test-exists \
   "$OWNER/bar/Bar2" \
@@ -45,7 +46,8 @@ test-exists \
 # Test that a fresh repo is not contaminated
 (
   git clone "$UPSTREAM/bar" "$OWNER/newbar"
-) &> /dev/null || die
+)
+# ) &> /dev/null || die
 
 test-exists \
   "$OWNER/newbar/Foo1" \
