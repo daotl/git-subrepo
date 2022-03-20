@@ -14,12 +14,12 @@ jobs:
         os: [ubuntu-latest, macos-latest]
 
     steps:
-    - uses: actions/checkout@v2
-    - if: startsWith(matrix.os, 'macos')
-      run: brew install bash
-    - run:
-        git checkout -B git-actions-ci-dummy-branch;
-        git config --global user.email "you@example.com";
-        git config --global user.name "Your Name";
-        git config --global init.defaultBranch main;
-    - run: make test
+      - uses: actions/checkout@v2
+      - if: startsWith(matrix.os, 'macos')
+        run: brew install bash
+      - run: git checkout -B git-actions-ci-dummy-branch;
+          git config --global user.email "you@example.com";
+          git config --global user.name "Your Name";
+          git config --global init.defaultBranch main;
+          git config --global pull.rebase false;
+      - run: make test
