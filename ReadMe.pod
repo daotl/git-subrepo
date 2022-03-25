@@ -10,6 +10,10 @@ See http://github.com/ingydotnet/swim-pm#readme
 
 git-subrepo - Git Submodule Alternative
 
+=for html
+<a href="https://github.com/mahmoudimus/git-subrepo/actions/workflows/test.yml"><img src="https://github.com/mahmoudimus/git-subrepo/actions/workflows/test.yml/badge.svg" alt="ci-badge"></a>
+
+
 =head1 Synopsis
 
     git subrepo -h    # Help Overview

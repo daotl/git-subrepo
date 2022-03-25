@@ -64,7 +64,7 @@ Options:
 h           Show the command summary
 help        Help overview
 version     Print the git-subrepo version number
- 
+
 a,all       Perform command on all current subrepos
 A,ALL       Perform command on all subrepos and subsubrepos
 b,branch=   Specify the upstream branch to push/pull/fetch
@@ -76,7 +76,7 @@ m,message=  Specify a commit message
 r,remote=   Specify the upstream remote to push/pull/fetch
 s,squash    Squash commits on push
 u,update    Add the --branch and/or --remote overrides to .gitrepo
- 
+
 q,quiet     Show minimal output
 v,verbose   Show verbose output
 d,debug     Show the actual commands used
@@ -164,6 +164,8 @@ main() {
     # Run the command on all subrepos
     local args=( "${command_arguments[@]}" )
     get-all-subrepos
+    # TODO(mahmoudimus): uncomment
+    # for subdir in "${subrepos[@]}"; do
     for subdir in ${subrepos[*]}; do
       command-prepare
       subrepo_remote=
@@ -195,7 +197,7 @@ command:clone() {
   local reclone_up_to_date=false
   subrepo:clone
   if "$reclone_up_to_date"; then
-    say "Subrepo '$subdir' is up to date."
+    say "Subrepo '$subdir' ($subrepo_branch) is up to date."
     return
   fi
 
@@ -231,10 +233,10 @@ command:pull() {
   command-setup +subdir
 
   subrepo:pull
-  if OK; then
+  if OK_or_0; then
     say "Subrepo '$subdir' pulled from '$subrepo_remote' ($subrepo_branch)."
   elif [[ $CODE -eq -1 ]]; then
-    say "Subrepo '$subdir' is up to date."
+    say "Subrepo '$subdir' ($subrepo_branch) is up to date."
   elif [[ $CODE -eq 1 ]]; then
     error-join
     return "$CODE"
@@ -250,10 +252,10 @@ command:push() {
   command-setup +subdir branch
 
   subrepo:push
-  if OK; then
+  if OK_or_0; then
     say "Subrepo '$subdir' pushed to '$subrepo_remote' ($subrepo_branch)."
   elif [[ $CODE -eq -2 ]]; then
-    say "Subrepo '$subdir' has no new commits to push."
+    say "Subrepo '$subdir' ($subrepo_branch) has no new commits to push."
   elif [[ $CODE -eq 1 ]]; then
     error-join
     return "$CODE"
@@ -415,7 +417,7 @@ command:help() {
 command:version() {
   cat <<...
 git-subrepo Version: $VERSION
-Copyright 2013-2020 Ingy döt Net
+Copyright 2013-2022 Ingy döt Net
 https://github.com/ingydotnet/git-subrepo
 ${BASH_SOURCE[0]}
 Git Version: $git_version
@@ -589,6 +591,13 @@ subrepo:push() {
   local new_upstream=false
   local branch_created=false
 
+  # if override_branch is not specified then calculate a default branch name for the subrepo push
+  # TODO: this makes the tests (test/branch-rev-list.t) fail
+  # if [ "$override_branch" = "" ]; then
+  #   repo_name="$(basename $(git rev-parse --show-toplevel))" || repo_name="unknown" # may fail
+  #   subrepo_branch="$repo_name-$original_head_branch"
+  # fi
+
   if [[ -z $branch_name ]]; then
     FAIL=false OUT=false CALL subrepo:fetch
 
@@ -652,6 +661,9 @@ subrepo:push() {
   new_upstream_head_commit=$(git rev-parse "$branch_name")
   if ! $new_upstream; then
     if [[ $upstream_head_commit == "$new_upstream_head_commit" ]]; then
+      if $update_wanted ; then
+        update-gitrepo-file
+      fi
       OK=false
       CODE=-2
       return
@@ -768,8 +780,10 @@ subrepo:branch() {
       [[ $prev_commit ]] && first_parent=(-p "$prev_commit")
       second_parent=()
       if [[ -z $first_gitrepo_commit ]]; then
-        first_gitrepo_commit=$gitrepo_commit
-        second_parent=(-p "$gitrepo_commit")
+        # first_gitrepo_commit=$gitrepo_commit
+        # second_parent=(-p "$gitrepo_commit")
+        first_gitrepo_commit="$subrepo_commit"
+        second_parent="-p $subrepo_commit"
       fi
 
       if [[ $join_method != rebase ]]; then
@@ -816,11 +830,25 @@ subrepo:branch() {
       "$subref" "$branch"
   fi
 
+  # Mechanism to skip subdirs containing subrepos during a push.
+  # TODO: 1) mention dependency on 'find'; 2) may be turned on/off on option.
+  if [[ $(hash find) -eq 0 ]]; then 
+    o "Checking $subdir for nested subdirs to avoid"
+    local subdirs
+    mapfile -t subdirs < <(cd -- "$subdir"; find . -mindepth 1 -type d -exec 'test' '-f' '{}/.gitrepo' ';' -print)
+    if [[ ${#subdirs[@]} -gt 0 ]]; then
+      for d in "${subdirs[@]}"; do
+        o "Found $d: will rebase to exclude it";
+        git filter-branch -f --index-filter "git rm -r --cached --ignore-unmatch \"${d}\"" "$branch" || true
+      done
+    fi
+  fi
+
   o "Remove the .gitrepo file from $first_gitrepo_commit..$branch"
   local filter=$branch
   [[ $first_gitrepo_commit ]] && filter=$first_gitrepo_commit..$branch
-  FAIL=false RUN git filter-branch -f --prune-empty --tree-filter \
-    "rm -f .gitrepo" "$filter"
+  FAIL=false RUN git filter-branch -f --prune-empty --index-filter \
+    'git rm --cached --ignore-unmatch .gitrepo' "$filter"
 
   git:create-worktree "$branch"
 
@@ -1399,14 +1427,17 @@ update-gitrepo-file() {
     fi
   fi
 
+  # only update remote and branch if supplied and $update_wanted
+  if $newfile || $update_wanted; then
+    if $newfile || [[ $override_remote ]]; then
+      o "Update remote to $subrepo_remote"
+      RUN git config --file="$gitrepo" subrepo.remote "$subrepo_remote"
+    fi
 
-  # TODO: only update remote and branch if supplied and $update_wanted
-  if $newfile || [[ $update_wanted && $override_remote ]]; then
-    RUN git config --file="$gitrepo" subrepo.remote "$subrepo_remote"
-  fi
-
-  if $newfile || [[ $update_wanted && $override_branch ]]; then
-    RUN git config --file="$gitrepo" subrepo.branch "$subrepo_branch"
+    if $newfile || [[ $override_branch ]]; then
+      o "Update branch to $subrepo_branch"
+      RUN git config --file="$gitrepo" subrepo.branch "$subrepo_branch"
+    fi
   fi
 
   RUN git config --file="$gitrepo" subrepo.commit "$upstream_head_commit"
@@ -1544,6 +1575,7 @@ assert-subdir-ready-for-init() {
 
 # If subdir exists, make sure it is empty:
 assert-subdir-empty() {
+  # if [[ -d "$subdir" ]] && [[ -n "$(ls -A "$subdir")" ]]; then
   if [[ -e $subdir ]] && [[ $(ls -A "$subdir") ]]; then
     error "The subdir '$subdir' exists and is not empty."
   fi
@@ -1560,8 +1592,11 @@ get-all-subrepos() {
   mapfile -t paths < <(git ls-files | sed -n 's!/\.gitrepo$!!p' | sort)
   subrepos=()
   local path
+  # while read -r path; do
+  #   add-subrepo "$path"
+  # done <<< "$paths"
   for path in "${paths[@]}"; do
-    add-subrepo "$path"
+      add-subrepo "$path"
   done
 }
 
@@ -1580,7 +1615,7 @@ get-upstream-head-branch() {
   OUT=true RUN git ls-remote --symref "$subrepo_remote"
   remotes=$output
   [[ $remotes ]] ||
-    error "Failed to 'git ls-remote --symref $subrepo_remote'."
+    error "Failed to 'git ls-remote --symref $subrepo_remote'.\nPlease make sure the repository exists, is not empty, and that you have access rights to it."
 
   # 'ref: refs/heads/master  HEAD'
   branch=$(
@@ -1707,7 +1742,8 @@ shown in the output above.
 
 This is the common conflict resolution workflow:
 
-  1. cd $worktree
+  1. cd $(realpath . --relative-to $OLDPWD)
+     alternatively: git-cola -r $(realpath .)
   2. Resolve the conflicts (see "git status").
   3. "git add" the resolved files.
 ...
@@ -1869,7 +1905,6 @@ RUN() {
   output=$out
 }
 
-
 interactive() {
   if [[ -t 0 && -t 1 ]]; then
     return 0
@@ -1906,6 +1941,11 @@ OK() {
   $OK
 }
 
+# Check if OK or 0:
+OK_or_0() {
+  $OK || [ "$CODE" = "0" ]
+}
+
 # Nicely report common error messages:
 usage-error() {
   local msg="git-subrepo: $1" usage=
@@ -1921,7 +1961,7 @@ usage-error() {
 
 # Nicely report common error messages:
 error() {
-  echo -e "git-subrepo: $1" >&2
+  echo -e "git-subrepo:" $@ >&2
   exit 1
 }
 

@@ -29,9 +29,11 @@ gitrepo=$OWNER/foo/bar/.gitrepo
   test-gitrepo-field cmdver "$(git subrepo --version)"
 }
 
+# pull without update - keep the previous branch and remote in .gitrepo
+
 (
   cd "$OWNER/foo"
-  git subrepo pull bar -b branch1 -u
+  git subrepo pull bar -b branch1
 ) &> /dev/null || die
 
 {
@@ -39,6 +41,24 @@ gitrepo=$OWNER/foo/bar/.gitrepo
   bar_head_commit=$(cd "$OWNER/bar" || exit; git rev-parse HEAD)
   test-gitrepo-comment-block
   test-gitrepo-field remote "$UPSTREAM/bar"
+  test-gitrepo-field branch master
+  test-gitrepo-field commit "$bar_head_commit"
+  test-gitrepo-field parent "$foo_pull_commit"
+  test-gitrepo-field cmdver "$(git subrepo --version)"
+}
+
+# pull with update - use new branch and remote
+
+(
+  cd "$OWNER/foo"
+  git subrepo pull bar -b branch1 -r "$UPSTREAM/bar/./" -u
+) &> /dev/null || die
+
+{
+  foo_pull_commit=$(cd "$OWNER/foo" || exit; git rev-parse HEAD^)
+  bar_head_commit=$(cd "$OWNER/bar" || exit; git rev-parse HEAD)
+  test-gitrepo-comment-block
+  test-gitrepo-field remote "$UPSTREAM/bar/./"
   test-gitrepo-field branch branch1
   test-gitrepo-field commit "$bar_head_commit"
   test-gitrepo-field parent "$foo_pull_commit"
@@ -50,7 +70,7 @@ gitrepo=$OWNER/foo/bar/.gitrepo
     cd "$OWNER/foo" || exit
     git subrepo pull bar
   )" \
-    "Subrepo 'bar' is up to date." \
+    "Subrepo 'bar' (branch1) is up to date." \
     'subrepo detects that we dont need to pull'
 }
 

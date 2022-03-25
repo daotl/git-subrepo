@@ -65,7 +65,7 @@ gitrepo=$OWNER/foo/bar/.gitrepo
     cd "$OWNER/foo"
     git subrepo pull bar
   )" \
-    "Subrepo 'bar' is up to date." \
+    "Subrepo 'bar' (master) is up to date." \
     'subrepo detects that we dont need to pull'
 }
 

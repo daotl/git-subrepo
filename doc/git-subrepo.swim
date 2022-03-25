@@ -1,6 +1,11 @@
 git-subrepo
 ===========
 
+<<< markdown
+![ci](https://github.com/mahmoudimus/git-subrepo/actions/workflows/test.yml/badge.svg)
+>>>
+
+
 Git Submodule Alternative
 
 = Synopsis
@@ -76,7 +81,9 @@ The best short answer is:
 
 The complete "Installation Instructions" can be found below.
 
-Note: git-subrepo needs a git version (> 2.7) that supports worktree:s.
+Notes:
+* git-subrepo needs a git version (> 2.7) that supports worktree:s.
+* some commands may break if the repository contains a branch named "subrepo".
 
 = Commands
 
