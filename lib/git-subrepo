@@ -889,7 +889,7 @@ subrepo:tag-head() {
   fi
 
   o "Tag '$tag' to HEAD"
-  RUN git tag "$tag"
+  TTY=true RUN git tag "$tag"
 }
 
 # Commit a merged subrepo branch:
@@ -1962,8 +1962,10 @@ RUN() {
 
 interactive() {
   if [[ -t 0 && -t 1 ]]; then
+    echo 'debug not interactive'
     return 0
   else
+    echo 'debug not interactive'
     return 1
   fi
 }
