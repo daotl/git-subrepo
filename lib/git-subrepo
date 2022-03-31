@@ -889,7 +889,8 @@ subrepo:tag-head() {
   fi
 
   o "Tag '$tag' to HEAD"
-  TTY=true RUN git tag "$tag"
+  # Add debug_wanted=true TTY=true to make it interactive to edit the tag message
+  debug_wanted=true TTY=true RUN git tag "$tag"
 }
 
 # Commit a merged subrepo branch:
