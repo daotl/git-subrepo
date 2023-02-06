@@ -95,7 +95,7 @@ experienced Git users.
 Please note that the commands are /not/ exact equivalents, and do not take all
 the same arguments. Keep reading…
 
-- `git subrepo clone <repository> [<subdir>] [-b <branch>] [-f] [-m <msg>] [-e] [--method <merge|rebase>]`
+- `git subrepo clone <repository> [<subdir>] [-b <branch>] [-f] [-m <msg>] [--file=<msg file>] [-e] [--method <merge|rebase>]`
 
   Add a repository as a subrepo in a subdir of your repository.
 
@@ -117,8 +117,8 @@ the same arguments. Keep reading…
   The `--method` option will decide how the join process between branches are
    performed. The default option is merge.
 
-  The `clone` command accepts the `--branch=` `--edit`, `--force` and
-  `--message=` options.
+  The `clone` command accepts the `--branch=` `--edit`, `--file`, `--force`
+  and `--message=` options.
 
 - `git subrepo init <subdir> [-r <remote>] [-b <branch>] [--method <merge|rebase>]`
 
@@ -133,7 +133,7 @@ the same arguments. Keep reading…
   If you specify the `--remote` (and optionally the `--branch`) option, the
   values will be added to the `<subdir>/.gitrepo` file. The `--remote` option
   is the upstream URL, and the `--branch` option is the upstream branch to push
-  to. These values will be needed to do a `git subrepo push` command, but they
+  to. These values will be needed to do a `git subrepo push` command, but they
   can be provided later on the `push` command (and saved to `<subdir>/.gitrepo`
   if you also specify the `--update` option).
 
@@ -145,7 +145,7 @@ the same arguments. Keep reading…
 
   The `init` command accepts the `--branch=` and `--remote=` options.
 
-- `git subrepo pull <subdir>|--all [-M|-R|-f] [-m <msg>] [-e] [-b <branch>] [-r <remote>] [-u]`
+- `git subrepo pull <subdir>|--all [-M|-R|-f] [-m <msg>] [--file=<msg file>] [-e] [-b <branch>] [-r <remote>] [-u]`
 
   Update the subrepo subdir with the latest upstream changes.
 
@@ -190,10 +190,10 @@ the same arguments. Keep reading…
 
   The set of commands used above are described in detail below.
 
-  The `pull` command accepts the `--all`, `--branch=`, `--edit`, `--force`,
-  `--message=`, `--remote=` and `--update` options.
+  The `pull` command accepts the `--all`, `--branch=`, `--edit`, `--file`,
+  `--force`, `--message=`, `--remote=` and `--update` options.
 
-- `git subrepo push <subdir>|--all [<branch>] [-r <remote>] [-b <branch>] [-M|-R] [-u] [-f] [-s] [-N] [-t] [-T]`
+- `git subrepo push <subdir>|--all [<branch>] [-m msg] [--file=<msg file>] [-r <remote>] [-b <branch>] [-M|-R] [-u] [-f] [-s] [-N] [-t] [-T]`
 
   Push a properly merged subrepo branch back upstream.
 
@@ -224,9 +224,9 @@ the same arguments. Keep reading…
   The `--tag-refresh` will apply the given tag (with `--tag`) to all specified
   subrepos' upstream HEAD even if they were not staged for changes.
 
-  The `push` command accepts the `--all`, `--branch=`, `--dry-run`, `--force`,
-  `--merge`, `--rebase`, `--remote=`, `--squash`, `--tag`, `--tag-refresh` and
-  `--update` options.
+  The `push` command accepts the `--all`, `--branch=`, `--dry-run`, `--file`,
+  `--force`, `--merge`, `--message`, `--rebase`, `--remote=`, `--squash`,
+  `--tag`, `--tag-refresh` and `--update` options.
 
 - `git subrepo fetch <subdir>|--all [-r <remote>] [-b <branch>]`
 
@@ -252,7 +252,7 @@ the same arguments. Keep reading…
 
   The `branch` command accepts the `--all`, `--fetch` and `--force` options.
 
-- `git subrepo commit <subdir> [<subrepo-ref>] [-m <msg>] [-e] [-f] [-F]`
+- `git subrepo commit <subdir> [<subrepo-ref>] [-m <msg>] [--file=<msg file>] [-e] [-f] [-F]`
 
   Add subrepo branch to current history as a single commit.
 
@@ -265,8 +265,8 @@ the same arguments. Keep reading…
   branch history. That way the same branch can push upstream. Use the
   `--force` option to commit anyway.
 
-  The `commit` command accepts the `--edit`, `--fetch`, `--force` and
-  `--message=` options.
+  The `commit` command accepts the `--edit`, `--fetch`, `--file`, `--force`
+  and `--message=` options.
 
 - `git subrepo status [<subdir>|--all|--ALL] [-F] [-q|-v]`
 
@@ -382,6 +382,10 @@ the same arguments. Keep reading…
 - `--fetch` (`-F`)
 
   Use this option to fetch the upstream commits, before running the command.
+
+- `--file=<commit msg file>`
+
+  Supply your own commit message from a file
 
 - `--force` (`-f`)
 

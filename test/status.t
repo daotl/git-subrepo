@@ -7,15 +7,15 @@ source test/setup
 use Test::More
 
 clone-foo-and-bar
-(
-     cd $OWNER/foo
-     git subrepo clone "$UPSTREAM/bar"
-     git subrepo clone "$UPSTREAM/foo" bar/foo
-     mkdir lib
-     git subrepo clone "$UPSTREAM/bar" lib/bar
-     git subrepo clone "$UPSTREAM/foo" lib/bar/foo
-) &> /dev/null || die
 
+(
+  cd $OWNER/foo
+  git subrepo clone ../../../$UPSTREAM/bar
+  git subrepo clone ../../../$UPSTREAM/foo bar/foo
+  mkdir lib
+  git subrepo clone ../../../$UPSTREAM/bar lib/bar
+  git subrepo clone ../../../$UPSTREAM/foo lib/bar/foo
+) &> /dev/null || die
 
 {
   output="$(
