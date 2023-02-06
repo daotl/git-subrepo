@@ -113,8 +113,10 @@ The C<git-subrepo> command benefits these roles in the following ways:
 
 The best short answer is:
 
-    git clone https://github.com/ingydotnet/git-subrepo /path/to/git-subrepo
+    git clone https://github.com/daotl/git-subrepo /path/to/git-subrepo
     echo 'source /path/to/git-subrepo/.rc' >> ~/.bashrc
+
+On native Windows C<cmd>, just run C<activate.bat>.
 
 The complete "Installation Instructions" can be found below.
 
@@ -528,7 +530,7 @@ Set this for debugging (C<-d>) output.
 There are currently 3 ways to install C<git-subrepo>. For all of them you need
 to get the source code from GitHub:
 
-    git clone https://github.com/ingydotnet/git-subrepo /path/to/git-subrepo
+    git clone https://github.com/daotl/git-subrepo /path/to/git-subrepo
 
 The first installation method is preferred: C<source> the C<.rc> file. Just
 add a line like this one to your shell startup script:
@@ -557,7 +559,9 @@ This method does not account for upgrading and command completion yet.
 
 =head2 Windows
 
-This command is known to work in these Windows environments:
+On native Windows C<cmd>, just run C<activate.bat>.
+
+This command is also known to work in these Windows environments:
 
 =over
 
